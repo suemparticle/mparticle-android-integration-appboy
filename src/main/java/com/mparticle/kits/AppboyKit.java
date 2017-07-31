@@ -3,12 +3,14 @@ package com.mparticle.kits;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 
 import com.appboy.Appboy;
 import com.appboy.AppboyGcmReceiver;
 import com.appboy.AppboyLifecycleCallbackListener;
 import com.appboy.AppboyUser;
+import com.appboy.IAppboyEndpointProvider;
 import com.appboy.configuration.AppboyConfig;
 import com.appboy.enums.Gender;
 import com.appboy.enums.SdkFlavor;
@@ -36,6 +38,8 @@ public class AppboyKit extends KitIntegration implements KitIntegration.Attribut
 
     static final String APPBOY_KEY = "apiKey";
     static final String FORWARD_SCREEN_VIEWS = "forwardScreenViews";
+    static final String DATA_CENTER_LOCATION = "dataCenterLocation";
+    static final String DATA_CENTER_LOCATION_EU = "EU";
     public static final String PUSH_ENABLED = "push_enabled";
     private static final String PREF_KEY_HAS_SYNCED_ATTRIBUTES = "appboy::has_synced_attributes";
     private static final String PREF_KEY_CURRENT_EMAIL = "appboy::current_email";
@@ -54,6 +58,18 @@ public class AppboyKit extends KitIntegration implements KitIntegration.Attribut
         String key = settings.get(APPBOY_KEY);
         if (KitUtils.isEmpty(key)) {
             throw new IllegalArgumentException("Appboy key is empty.");
+        }
+
+        if (DATA_CENTER_LOCATION_EU.equalsIgnoreCase(settings.get(DATA_CENTER_LOCATION))) {
+            Appboy.setAppboyEndpointProvider(
+                    new IAppboyEndpointProvider() {
+                        @Override
+                        public Uri getApiEndpoint(Uri appboyEndpoint) {
+                            return appboyEndpoint.buildUpon()
+                                    .authority("sdk.api.appboy.eu").build();
+                        }
+                    }
+            );
         }
         forwardScreenViews = Boolean.parseBoolean(settings.get(FORWARD_SCREEN_VIEWS));
         AppboyConfig config = new AppboyConfig.Builder().setApiKey(key).setSdkFlavor(SdkFlavor.MPARTICLE).build();
