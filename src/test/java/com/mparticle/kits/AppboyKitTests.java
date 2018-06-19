@@ -12,6 +12,8 @@ import com.mparticle.commerce.Cart;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
 
+import com.mparticle.kits.core.KitIntegration;
+
 import org.junit.Test;
 import org.mockito.Mockito;
 

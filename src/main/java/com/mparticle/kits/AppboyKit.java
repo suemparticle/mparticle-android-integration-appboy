@@ -23,6 +23,10 @@ import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.Logger;
+import com.mparticle.kits.core.FilteredIdentityApiRequest;
+
+import com.mparticle.kits.core.KitIntegration;
+import com.mparticle.kits.core.ReportingMessage;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -34,7 +38,7 @@ import java.util.Map;
 /**
  * mParticle client-side Appboy integration
  */
-public class AppboyKit extends KitIntegration implements KitIntegration.AttributeListener, KitIntegration.CommerceListener, KitIntegration.EventListener, KitIntegration.PushListener, KitIntegration.IdentityListener {
+public class AppboyKit extends AbstractKitIntegration implements KitIntegration.AttributeListener, KitIntegration.CommerceListener, KitIntegration.EventListener, KitIntegration.PushListener, KitIntegration.IdentityListener {
 
     static final String APPBOY_KEY = "apiKey";
     static final String FORWARD_SCREEN_VIEWS = "forwardScreenViews";
@@ -55,7 +59,7 @@ public class AppboyKit extends KitIntegration implements KitIntegration.Attribut
     }
 
     @Override
-    protected List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
+    public List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
         String key = settings.get(APPBOY_KEY);
         if (KitUtils.isEmpty(key)) {
             throw new IllegalArgumentException("Appboy key is empty.");
@@ -116,7 +120,7 @@ public class AppboyKit extends KitIntegration implements KitIntegration.Attribut
         }
         queueDataFlush();
         List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
-        messages.add(ReportingMessage.fromEvent(this, event));
+        messages.add(ReportingMessageImpl.fromEvent(this, event));
         return messages;
     }
 
@@ -134,7 +138,7 @@ public class AppboyKit extends KitIntegration implements KitIntegration.Attribut
             }
             queueDataFlush();
             List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
-            messages.add(new ReportingMessage(this, ReportingMessage.MessageType.SCREEN_VIEW, System.currentTimeMillis(), screenAttributes));
+            messages.add(new ReportingMessageImpl(this, ReportingMessageImpl.MessageType.SCREEN_VIEW, System.currentTimeMillis(), screenAttributes));
             return messages;
         } else {
             return null;
@@ -157,7 +161,7 @@ public class AppboyKit extends KitIntegration implements KitIntegration.Attribut
             for (Product product : productList) {
                 logTransaction(event, product);
             }
-            messages.add(ReportingMessage.fromEvent(this, event));
+            messages.add(ReportingMessageImpl.fromEvent(this, event));
             queueDataFlush();
             return messages;
         }
@@ -166,7 +170,7 @@ public class AppboyKit extends KitIntegration implements KitIntegration.Attribut
             for (int i = 0; i < eventList.size(); i++) {
                 try {
                     logEvent(eventList.get(i));
-                    messages.add(ReportingMessage.fromEvent(this, event));
+                    messages.add(ReportingMessageImpl.fromEvent(this, event));
                 } catch (Exception e) {
                     Logger.warning("Failed to call logCustomEvent to Appboy kit: " + e.toString());
                 }
