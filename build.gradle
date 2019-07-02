@@ -23,6 +23,6 @@ repositories {
 }
 
 dependencies {
-    testImplementation project(':testutils')
+    testImplementation "com.mparticle:test-utils:$project.version"
     api 'com.appboy:android-sdk-ui:3.5.0'
 }
