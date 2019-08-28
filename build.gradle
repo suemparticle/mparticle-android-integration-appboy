@@ -5,12 +5,12 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.mparticle:android-kit-plugin:' + project.version
+        classpath 'com.mparticle:android-kit-plugin:' + '5.9.8'
     }
 }
+project.version = '5.9.8'
 
 apply plugin: 'com.mparticle.kit'
-
 android {
     defaultConfig {
         minSdkVersion 16
@@ -23,6 +23,5 @@ repositories {
 }
 
 dependencies {
-    testImplementation project(':testutils')
     api 'com.appboy:android-sdk-ui:3.5.0'
 }

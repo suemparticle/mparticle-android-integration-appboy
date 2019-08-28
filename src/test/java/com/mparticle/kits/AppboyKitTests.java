@@ -7,20 +7,12 @@ import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
 
 import com.appboy.Appboy;
-import com.appboy.AppboyUser;
 import com.appboy.MockAppboyUser;
 import com.appboy.enums.Month;
 import com.mparticle.MParticle;
-import com.mparticle.UserAttributeListener;
-import com.mparticle.commerce.Cart;
-import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.internal.ReportingManager;
-import com.mparticle.mock.AbstractMParticleUser;
-import com.mparticle.mock.MockCoreCallbacks;
-import com.mparticle.mock.MockKitManagerImpl;
-import com.mparticle.mock.MockMParticle;
+import com.mparticle.internal.KitManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -135,8 +127,11 @@ public class AppboyKitTests {
     public void testOnModify() {
         //make sure it doesn't crash if there is no email or customerId
         Exception e = null;
+
         try {
-            new AppboyKit().onModifyCompleted(new MockUser(new HashMap<MParticle.IdentityType, String>()), null);
+            MParticleUser user = Mockito.mock(MParticleUser.class);
+            Mockito.when(user.getUserIdentities()).thenReturn(new HashMap<MParticle.IdentityType, String>());
+            new AppboyKit().onModifyCompleted(user, null);
         }
         catch (Exception ex) {
             e = ex;
@@ -169,15 +164,18 @@ public class AppboyKitTests {
             map.put(MParticle.IdentityType.Facebook, "facebook");
             map.put(MParticle.IdentityType.Facebook, "fb");
             map.put(MParticle.IdentityType.CustomerId, mockCustomerId);
+
+            MParticleUser user = Mockito.mock(MParticleUser.class);
+            Mockito.when(user.getUserIdentities()).thenReturn(map);
             switch (i) {
                 case 0:
-                    kit.onModifyCompleted(new MockUser(map), null);
+                    kit.onModifyCompleted(user, null);
                 case 1:
-                    kit.onIdentifyCompleted(new MockUser(map), null);
+                    kit.onIdentifyCompleted(user, null);
                 case 2:
-                    kit.onLoginCompleted(new MockUser(map), null);
+                    kit.onLoginCompleted(user, null);
                 case 3:
-                    kit.onLogoutCompleted(new MockUser(map), null);
+                    kit.onLogoutCompleted(user, null);
             }
             assertEquals(mockCustomerId, values[0]);
             assertEquals(mockEmail, values[1]);
@@ -211,6 +209,9 @@ public class AppboyKitTests {
     public void testSetUserAttributeAge() {
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         AppboyKit kit = new MockAppboyKit();
+        kit.setKitManager(Mockito.mock(KitManagerImpl.class));
+        Mockito.when(kit.getKitManager().getContext()).thenReturn(Mockito.mock(Context.class));
+        Mockito.when(kit.getContext()).thenReturn(Mockito.mock(Context.class));
         MockAppboyUser currentUser = (MockAppboyUser)Appboy.getInstance(null).getCurrentUser();
 
         assertEquals(-1, currentUser.dobDay);
@@ -227,7 +228,7 @@ public class AppboyKitTests {
         final String[] calledAuthority = new String[1];
 
         MockAppboyKit() {
-            setKitManager(new MockKitManagerImpl(Mockito.mock(Context.class), Mockito.mock(ReportingManager.class), new MockCoreCallbacks()));
+
         }
 
         @Override
@@ -366,24 +367,6 @@ public class AppboyKitTests {
         @Override
         public void apply() {
 
-        }
-    }
-
-    class MockUser extends AbstractMParticleUser {
-        Map<MParticle.IdentityType, String> identities;
-
-        MockUser(Map<MParticle.IdentityType, String> identities) {
-            this.identities = identities;
-        }
-
-        @Override
-        public Map<MParticle.IdentityType, String> getUserIdentities() {
-            return identities;
-        }
-
-
-        public boolean isLoggedIn() {
-            return false;
         }
     }
 
