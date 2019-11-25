@@ -13,7 +13,7 @@ This repository contains an [example app](https://github.com/mparticle-integrati
 
 [See a full build.gradle example here](https://github.com/mparticle-integrations/mparticle-android-integration-appboy/blob/master/example/build.gradle)
 
-1. The Braze Kit requires that you add Braze's Maven server to your buildscript:
+1. The Braze Kit requires that you add Braze's Maven server to your allprojects:
 
     ```
     repositories {
